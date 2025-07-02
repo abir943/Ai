@@ -1,20 +1,20 @@
-// 🎨 Aminul's Gemini-style API for Render
+// 🎨 Aminul's Gemini-style API for Render (Fixed OpenAI usage)
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 const chalk = require("chalk");
-const gradient = require("gradient-string");
 const figlet = require("figlet");
-const { Configuration, OpenAIApi } = require("openai");
+const gradient = require("gradient-string");
+const { OpenAI } = require("openai");
 
 const app = express();
 app.use(cors());
 
-const configuration = new Configuration({
+// ✅ OpenAI instance setup (for v4+)
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration);
 
 // 🌈 Show fancy banner
 const showBanner = () => {
@@ -40,16 +40,16 @@ app.get("/gemini", async (req, res) => {
   }
 
   try {
-    console.log(chalk.yellow("💬 Received prompt:"), ask);
+    console.log(chalk.yellow("💬 Prompt received:"), ask);
 
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o-mini",
+    const chat = await openai.chat.completions.create({
+      model: "gpt-4o", // or "gpt-3.5-turbo"
       messages: [{ role: "user", content: ask }],
     });
 
-    const reply = completion.data.choices[0].message.content;
-
+    const reply = chat.choices[0].message.content;
     console.log(chalk.greenBright("✅ Response sent"));
+
     res.json({
       status: true,
       operator: "Aminul",
@@ -65,9 +65,9 @@ app.get("/gemini", async (req, res) => {
   }
 });
 
-// 🌐 Start
+// 🌐 Start Server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   showBanner();
-  console.log(chalk.green(`🚀 Server ready on http://localhost:${PORT}/gemini`));
+  console.log(chalk.green(`🚀 Server running on http://localhost:${PORT}/gemini`));
 });
