@@ -1,0 +1,22 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ask OpenAI</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    textarea { width: 100%; padding: 10px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+    #response { margin-top: 20px; background: #fff; padding: 15px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>💬 Ask OpenAI</h1>
+  <textarea id="userInput" rows="4" placeholder="Type your question here..."></textarea><br>
+  <button onclick="askOpenAI()">Submit</button>
+  <div id="response"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
