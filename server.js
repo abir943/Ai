@@ -1,74 +1,56 @@
-// 🎨 Aminul's Gemini-style Chat API (Render Compatible - Fully Fixed)
-
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
-
-const chalk = require("chalk");
-const figlet = require("figlet");
-const gradient = require("gradient-string");
-const { OpenAI } = require("openai");
+// server.js
+require('dotenv').config();
+const express = require('express');
+const fetch = require('node-fetch');
+const path = require('path');
 
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 3000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// ✅ OpenAI Setup (v4+)
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 🌈 Show Fancy Banner (Fixed)
-const showBanner = () => {
-  console.clear();
-  console.log(
-    gradient.fruit(
-      figlet.textSync("Aminul API", { horizontalLayout: "fitted" })
-    )
-  );
-  console.log(chalk.cyan("🌐 Endpoint:"), "/gemini?ask=YourQuestion");
-  console.log(chalk.magenta("🤖 Powered by OpenAI | Render Ready"));
-  console.log("");
-};
+app.get('/openai', async (req, res) => {
+  const question = req.query.ask;
 
-// 🚀 Main Route
-app.get("/gemini", async (req, res) => {
-  const ask = req.query.ask;
-  if (!ask) {
-    return res.status(400).json({
+  if (!question) {
+    return res.json({
       status: false,
-      message: "❌ Please use ?ask=your_question"
+      operator: "aminul sordar",
+      message: "Missing 'ask' query parameter. Example: /openai?ask=your_question"
     });
   }
 
   try {
-    console.log(chalk.yellow("💬 Prompt received:"), ask);
-
-    const chat = await openai.chat.completions.create({
-      model: "gpt-4o", // or gpt-3.5-turbo, gpt-4
-      messages: [{ role: "user", content: ask }],
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: question }]
+      })
     });
 
-    const reply = chat.choices[0].message.content;
+    const data = await openaiRes.json();
+    const reply = data.choices?.[0]?.message?.content || "No response from OpenAI.";
 
-    console.log(chalk.greenBright("✅ Reply sent"));
     res.json({
       status: true,
-      operator: "Aminul",
-      gemini: reply
+      operator: "aminul sordar",
+      message: reply
     });
-  } catch (err) {
-    console.log(chalk.red("⛔ Error:"), err.message);
-    res.status(500).json({
+  } catch (error) {
+    res.json({
       status: false,
-      message: "Something went wrong",
-      error: err.message
+      operator: "aminul sordar",
+      message: "Error communicating with OpenAI API."
     });
   }
 });
 
-// 🌐 Server Listen (Render uses PORT from env)
-const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  showBanner();
-  console.log(chalk.green(`🚀 Server running on http://localhost:${PORT}/gemini`));
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
